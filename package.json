@@ -1,0 +1,1 @@
+{"name":"tnf-otomasyon","private":true,"type":"module","scripts":{"start":"node run.mjs"},"dependencies":{"esbuild":"0.25.12","playwright":"1.56.1"}}

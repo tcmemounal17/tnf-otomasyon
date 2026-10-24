@@ -1,0 +1,36 @@
+name: TNF Canli RSS
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      probe:
+        description: 'Yalnız bağlantıyı kontrol et; haber paylaşma'
+        type: boolean
+        default: true
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: tnf-live-rss
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Prepare renderer
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-liberation
+      - name: Run TNF
+        env:
+          TNF_PROBE: ${{ github.event_name == 'workflow_dispatch' && inputs.probe && 'true' || 'false' }}
+        run: node run.mjs
